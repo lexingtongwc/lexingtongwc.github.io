@@ -1,0 +1,136 @@
+<html><head>
+		<title>Girls Who Code Sample</title>
+		<script type="text/javascript" src="./processing.min.js"></script>		
+</head>
+	<body>
+		<h1>GwC Lexington Sample</h1>
+		
+		<p>Check out my brick out game!</p>
+		
+		<canvas id="processing-canvas" tabindex="0" style="width='5000px' height='5000px'"></canvas>
+
+<script type="text/processing" data-processing-target="processing-canvas">
+size(400, 400);
+
+var paddleW = 75;
+var paddleH = 10;
+var bottom = 390 - paddleH;
+var right = 400 - paddleW;
+
+var bricksToDraw = [true, true, true, true, true, true, true, true];
+
+var brickH = 15;
+var brickW = 90;
+var brickTop1 = 30;
+var brickTop2 = brickTop1 + brickH + 10;
+
+var x = 0;
+var speedFloor = 2;
+var speedCeiling = 7;
+var speedX = speedFloor;
+var speedY = speedFloor;
+
+var ballX = 200;
+var ballY = 200;
+
+var drawBricks = function() {
+    for(var i = 0; i < 4; ++i) {
+        var pos = i * 100;
+        if(bricksToDraw[i]) {
+            rect(pos + 5, brickTop1, brickW, brickH);
+        }
+        if(bricksToDraw[i+4]) {
+            rect(pos + 5, brickTop2, brickW, brickH);
+        }
+    }
+};
+
+var testBricks = function() {
+    for(var i = 0; i < 4; ++i) {
+        var pos = i * 100;
+        var changeSpeed = false;
+        var directionX = 1;
+        if(ballX > (pos+5) && ballX < (pos+5+brickW) && 
+           ballY > brickTop1 && ballY < (brickTop1+brickH)) {
+            if(bricksToDraw[i]) {   
+                bricksToDraw[i] = false;   
+                changeSpeed = true;
+            }
+        }
+        
+        if(ballX > (pos+5) && ballX < (pos+5+brickW) && 
+           ballY > brickTop2 && ballY < (brickTop2+brickH)) {
+            if(bricksToDraw[i+4]) {   
+                bricksToDraw[i+4] = false; 
+                changeSpeed = true;
+            }
+        } 
+        
+        if(changeSpeed) {
+            speedX = random(speedFloor,speedCeiling);
+            speedY = random(speedFloor,speedCeiling);
+        }
+    }
+};
+
+var testPaddle = function() {
+    if(ballX > x && ballX < (x + paddleW) && ballY > bottom) {
+        speedX = -random(speedFloor,speedCeiling);
+        speedY = -random(speedFloor,speedCeiling);
+    }
+};
+
+var testWall = function() {
+    if(ballX > 400 || ballX < 0) {
+        speedX = -speedX;
+    }
+    if(ballY > 400) {
+        ballX = 200;
+        ballY = 150;
+        speedY = speedFloor;
+        speedX = speedFloor;
+    } else if(ballY < 0) {
+        speedY = -speedY;
+    }
+};
+
+var testWin = function() {
+    var iWon = true;
+    for(var i = 0; i < 8 && iWon; i++) {
+        if(bricksToDraw[i]) {
+            iWon = false;
+        }
+    }
+    
+    if(iWon) {
+        background(255, 0, 0);
+        text("CONGRATULATIONS!!", 10, 100, 380, 200);
+    }
+};
+
+draw = function() {
+    background(0, 0, 0);
+    drawBricks();
+    
+    // Paddle
+    x = mouseX;
+    if(x > right) {
+        x = right;
+    }
+    rect(x, bottom, paddleW, paddleH, 100); 
+    
+    // Ball
+    ballX += speedX;
+    ballY += speedY;
+    ellipse(ballX, ballY, 10, 10);
+    
+    // Test Contact
+    testBricks();
+    testPaddle();
+    testWall();
+    
+    testWin();
+};
+
+</script>
+</body></html>
